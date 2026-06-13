@@ -1,6 +1,6 @@
 const { createApp, ref, onMounted, computed } = Vue;
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = 'http://localhost:3104/api';
 
 createApp({
   setup() {
@@ -38,6 +38,49 @@ createApp({
     let audioContext = null;
     let noiseNode = null;
     let gainNode = null;
+
+    const expandedMonths = ref({});
+
+    const timelineMonths = computed(() => {
+      const map = {};
+      dreams.value.forEach(dream => {
+        const d = new Date(dream.date);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!map[key]) {
+          map[key] = [];
+        }
+        map[key].push(dream);
+      });
+
+      return Object.entries(map)
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .map(([key, items]) => {
+          const [year, month] = key.split('-').map(Number);
+          const count = items.length;
+          const avgLucidity = count > 0
+            ? (items.reduce((s, d) => s + d.lucidity, 0) / count).toFixed(1)
+            : 0;
+          const topDream = items.reduce((best, d) => d.lucidity > best.lucidity ? d : best, items[0]);
+          return {
+            key,
+            year,
+            month,
+            label: `${year}年${month}月`,
+            count,
+            avgLucidity: parseFloat(avgLucidity),
+            topDream,
+            dreams: items.sort((a, b) => new Date(b.date) - new Date(a.date))
+          };
+        });
+    });
+
+    function toggleMonth(key) {
+      expandedMonths.value[key] = !expandedMonths.value[key];
+    }
+
+    function isMonthExpanded(key) {
+      return !!expandedMonths.value[key];
+    }
 
     function getToken() {
       return localStorage.getItem('dream_token');
@@ -276,7 +319,10 @@ createApp({
       selectedYear,
       selectedMonth,
       yearOptions,
-      onMonthChange
+      onMonthChange,
+      timelineMonths,
+      toggleMonth,
+      isMonthExpanded
     };
   }
 }).mount('#app');

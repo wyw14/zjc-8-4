@@ -128,6 +128,46 @@
             </div>
           </div>
         </div>
+
+        <div class="card">
+          <h2>🕐 梦境时间轴</h2>
+          <div v-if="timelineMonths.length === 0" class="empty-dream">还没有记录梦境</div>
+          <div v-else class="timeline">
+            <div v-for="month in timelineMonths" :key="month.key" class="timeline-month">
+              <div class="timeline-month-header" @click="toggleMonth(month.key)">
+                <div class="timeline-dot"></div>
+                <div class="timeline-month-info">
+                  <div class="timeline-month-label">
+                    <span class="timeline-month-name">{{ month.label }}</span>
+                    <span class="timeline-toggle">{{ isMonthExpanded(month.key) ? '▼' : '▶' }}</span>
+                  </div>
+                  <div class="timeline-month-stats">
+                    <span class="timeline-stat">📝 {{ month.count }}条记录</span>
+                    <span class="timeline-stat">⭐ 平均清醒度 {{ month.avgLucidity }}</span>
+                    <span class="timeline-stat">🏆 最高清醒度: {{ month.topDream.lucidity }} ★</span>
+                  </div>
+                  <div class="timeline-top-dream">
+                    "{{ month.topDream.content }}"
+                  </div>
+                </div>
+              </div>
+              <div v-if="isMonthExpanded(month.key)" class="timeline-month-dreams">
+                <div v-for="dream in month.dreams" :key="dream.id" class="timeline-dream-item">
+                  <div class="timeline-dream-line"></div>
+                  <div class="timeline-dream-content">
+                    <div class="dream-header">
+                      <span class="dream-date">{{ dream.date }}</span>
+                      <span class="dream-lucidity">
+                        <span v-for="n in 5" :key="n" class="star">{{ n <= dream.lucidity ? '★' : '☆' }}</span>
+                      </span>
+                    </div>
+                    <div class="dream-text">{{ dream.content }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   </div>
